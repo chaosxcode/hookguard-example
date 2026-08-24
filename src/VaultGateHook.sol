@@ -1,13 +1,9 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
-
 /// @title VaultGateHook — minimal, cleanly-gated example hook
 /// @notice Ships scanning-clean on purpose: it demonstrates the guard
 ///         patterns HookGuard looks for (beforeInitialize gate +
 ///         PoolManager-only callbacks) as the recommended starting point.
-interface IPoolManager {
-    function getHookPermissions() external;
-}
+
+pragma solidity ^0.8.24;
 
 contract VaultGateHook {
     address public immutable poolManager;
@@ -27,8 +23,14 @@ contract VaultGateHook {
         poolManager = _poolManager;
     }
 
-    /// Only pools created through our factory may attach.
-    function _beforeInitialize(address sender, bytes32 poolId) internal {
+    /// Zero permissions: this template performs no callback logic yet.
+    /// Declare flags here as you add callbacks.
+    function getHookPermissions() public pure returns (bytes32 perms_) {
+        perms_; // all false
+    }
+
+    /// Only senders allowlisted by governance may attach pools.
+    function _beforeInitialize(address sender) internal {
         if (!allowedHooks[sender]) revert UnknownPool();
         emit PoolGated(sender);
     }
